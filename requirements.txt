@@ -1,4 +1,4 @@
 asyncio
 aiohttp
-psycopg2-binary
-redis
+aiopg
+sqlalchemy
