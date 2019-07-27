@@ -1,9 +1,13 @@
 import json
-from aiohttp import web
+from aiohttp import web, ClientSession
 from aiohttp.web_exceptions import HTTPMethodNotAllowed
 from asyncio.log import logger
 
 from src.tasks_table_operations import TasksTableOperations
+from src.utils import AAAAAA
+
+b = AAAAAA(result=None, error=None)
+a = TasksTableOperations()
 
 
 def json_error(status_code: int, exception: Exception) -> web.Response:
@@ -59,31 +63,59 @@ async def logger_middleware(request, handler):
     return response
 
 
-async def make_task(request):
-    resp = None
-    print(23)
-    error = None
-    return web.Response(body=json.dumps({"result": resp, "error": error}))
+async def generate_joke(request):
+    data = await request.json()
+
+    async with ClientSession() as session:
+        response = await session.get("https://geek-jokes.sameerkumar.website/api")
+        joke_text = await response.json()
+
+    id_joke = await a.joke_insert(data["apikey"], joke_text)
+    return web.Response(body=json.dumps(b.change_and_return({"result": {"joke_id": id_joke.id}})))
+
+
+async def delete_joke(request):
+    data = await request.json()
+
+    await a.joke_delete(data["apikey"], data["joke_id"])
+    return web.Response(body=json.dumps(b.get()))
+
+
+async def get_joke(request):
+    data = await request.json()
+
+    await a.joke_delete(data["joke_id"])
+    return web.Response(body=json.dumps(b.get()))
 
 
 async def do_login(request):
-    resp, error = None, None
     data = await request.json()
+    login = data.get("login")
 
-    a = TasksTableOperations()
-    z = await a.select(1)
-    print(z)
-    if data.get("login"):
-        print(data)
+    if login:
+        api_key = await a.do_login(login)
+        response = b.change_and_return({"result": {"login": login, "api_key": api_key}})
     else:
-        print("error login dont receive")
-    return web.Response(body=json.dumps({"result": resp, "error": error}))
+        response = b.change_and_return({"error": "login dont receive"})
+
+    return web.Response(body=json.dumps(response))
 
 
-app = web.Application(middlewares=[error_middleware, logger_middleware, auth_middleware])
-app.router.add_get("/", make_task)
+async def on_startup(request):
+    await a.init()
+
+
+app = web.Application(middlewares=[ auth_middleware])
+app.router.add_get("/", generate_joke)
 app.router.add_post("/do_login", do_login)
+app.router.add_post("/joke",   generate_joke)
 
+# app.router.add_put("/joke",    generate_joke)
+app.router.add_get("/joke",    get_joke)
+app.router.add_delete("/joke", delete_joke)
+
+
+app.on_startup.append(on_startup)
 
 host = "localhost"
 port = 9996

@@ -3,3 +3,6 @@ db_run:
 
 login:
 	curl -X POST 0.0.0.0:9996/do_login -d '{"login": "gomonuk"}'
+
+bad_login:
+	curl -X POST 0.0.0.0:9996/do_login -d '{"login": ""}'
