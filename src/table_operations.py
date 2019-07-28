@@ -13,10 +13,12 @@ account = sa.Table("account", metadata,
 
 joke = sa.Table("joke", metadata,
                 sa.Column("id", sa.Integer, primary_key=True),
-                sa.Column("text", sa.String(255)))
+                sa.Column("text", sa.String(255)),
+                sa.Column("number_of_uses", sa.Integer)
+                )
 
 
-class TasksTableOperations(object):
+class TableOperations(object):
     def __init__(self):
         self.engine = None
 
@@ -26,9 +28,9 @@ class TasksTableOperations(object):
             user="postgres",
             password="",
             host="localhost",
-            port="5433",
+            port="5431",
         )
-        await self.__create_tables()
+        # await self.__create_tables()
 
     async def __create_tables(self):
         async with self.engine.acquire() as conn:
@@ -41,7 +43,6 @@ class TasksTableOperations(object):
                                      RETURN floor(random()* (high-low + 1) + low);
                                   END;
                                   $$ language 'plpgsql' STRICT;
-                                  
                                   """)
             await conn.execute("""create table account
                                   (
@@ -62,24 +63,29 @@ class TasksTableOperations(object):
                                       id   serial not null
                                           constraint joke_pk
                                               primary key,
-                                      text text default ''::text
+                                      text text default ''::text,
+                                      number_of_uses int default 1
                                   );
                                   alter table joke
                                       owner to postgres;
                                   create unique index joke_text_uindex
                                       on joke (text);
                                       ''')
+            await conn.execute("""CREATE OR REPLACE FUNCTION array_unique (ANYARRAY) RETURNS ANYARRAY
+                                  LANGUAGE SQL
+                                  AS $body$
+                                    SELECT array(SELECT DISTINCT UNNEST($1)) ;
+                                  $body$;""")
 
     async def do_login(self, login):
         async with self.engine.acquire() as conn:
-            # update(users).where(users.c.id == 5). \
-            #     values(name='user #5')
-            # ins = users.insert().values(name='jack', fullname='Jack Jones')
-
-            # query = (sa.insert(account).values(login=login))
-            # query = account.insert().returning(sa.literal_column('*')).values(login=login)            query = account.insert().returning(sa.literal_column('*')).values(login=login)
             query = account.insert().returning(account.c.key).values(login=login)
+            async for row in conn.execute(query):
+                return row.key
 
+    async def check_apikey(self, apikey):
+        async with self.engine.acquire() as conn:
+            query = account.select().where(account.c.key == apikey)
             async for row in conn.execute(query):
                 return row.key
 
@@ -91,28 +97,46 @@ class TasksTableOperations(object):
             async for row in conn.execute(query):
                 joke_id = row
 
-            if not joke_id:
+            if joke_id:
+                query = joke.update().where(joke.c.id == joke_id.id).values(number_of_uses=joke.c.number_of_uses + 1)
+                await conn.execute(query)
+            else:
                 query = joke.insert().returning(joke.c.id).values(text=joke_text.strip())
                 async for row in conn.execute(query):
                     joke_id = row
+            query = account.update().where(account.c.key == key).values(
+                jokes=sa.func.array_unique(account.c.jokes + sa.cast([joke_id.id], sa.ARRAY(sa.Integer)))
+            )
 
-            query = account.update().where(account.c.key == key).values(jokes=account.c.jokes + sa.cast([joke_id.id], sa.ARRAY(sa.Integer)))
             await conn.execute(query)
         return joke_id
 
     async def joke_delete(self, key, joke_id):
         async with self.engine.acquire() as conn:
-            query = joke.delete().where(joke.c.id == joke_id)
+            query = """
+                       UPDATE joke SET number_of_uses = number_of_uses - 1 
+                       FROM account Where array_append(ARRAY[]::integer[], joke.id) <@ account.jokes
+                       AND joke.id = {joke_id}
+                       AND account.key = {account_key}
+                       RETURNING *;
+                       """
+
+            await conn.execute(query.format(joke_id=joke_id, account_key=key))
+            query = account.update().returning(account.c.id).where(account.c.key == key).values(
+                jokes=sa.func.array_remove(account.c.jokes, joke_id)
+            )
             await conn.execute(query)
 
-            query = account.update().where(account.c.key == key).values(jokes=sa.func.array_remove(account.c.jokes, joke_id))
-            await conn.execute(query)
+    async def joke_get(self, key, joke_id=None):
+        if joke_id:
+            conditions = sa.and_(joke.c.id == joke_id, account.c.key == key)
+        else:
+            conditions = account.c.key == key
 
-
-    async def joke_get(self, joke_id):
+        account_joke_join = sa.join(account, joke, joke.c.id == sa.func.any(account.c.jokes))
+        query13 = sa.select([joke.c.id, joke.c.text]).select_from(account_joke_join).where(conditions)
         async with self.engine.acquire() as conn:
-            query = joke.select().where(joke.c.id == joke_id)
-             async for row in conn.execute(query):
-                joke_id = row
-
-        return joke_id
+            jokes_row = []
+            async for row in conn.execute(query13):
+                jokes_row.append(dict(row))
+        return jokes_row
