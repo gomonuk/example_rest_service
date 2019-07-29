@@ -2,3 +2,4 @@ asyncio
 aiohttp
 aiopg
 sqlalchemy
+aiohttp_swagger
