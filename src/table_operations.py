@@ -32,7 +32,6 @@ class TableOperations(object):
             database="postgres",
             user="postgres",
             password="",
-            # host="0.0.0.0",
             host="postgres",
             port="5432",
         )
@@ -43,6 +42,13 @@ class TableOperations(object):
             """DROP TABLE IF EXISTS logs""",
             """DROP TABLE IF EXISTS account""",
             """DROP TABLE IF EXISTS joke""",
+            """CREATE OR REPLACE FUNCTION random_between(low INT ,high INT) RETURNS INT AS
+               $$
+               BEGIN
+                  RETURN floor(random()* (high-low + 1) + low);
+               END;
+               $$ language 'plpgsql' STRICT;""",
+
             """create table account (
                    id    serial                                               not null
                        constraint account_pk
@@ -89,16 +95,11 @@ class TableOperations(object):
                   IF  NEW.number_of_uses = 0  THEN
                   DELETE FROM joke WHERE id = NEW.id;
                   RETURN NEW;
+                  ELSE RETURN NEW;
                   END IF;
                END;
                $$ LANGUAGE plpgsql;""",
             """CREATE TRIGGER remove_joke AFTER UPDATE ON joke FOR EACH ROW EXECUTE PROCEDURE remove_joke();""",
-            """CREATE OR REPLACE FUNCTION random_between(low INT ,high INT) RETURNS INT AS
-               $$
-               BEGIN
-                  RETURN floor(random()* (high-low + 1) + low);
-               END;
-               $$ language 'plpgsql' STRICT;""",
         ]
         async with self.engine.acquire() as conn:
             for script in sql_sqripts:

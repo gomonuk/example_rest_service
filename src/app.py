@@ -47,7 +47,7 @@ async def update_joke(request):
     joke_text = data["joke_text"]
     joke = await to.joke_get(key=apikey, joke_id=joke_id)
 
-    if joke:
+    if len(joke) == 1:
         await to.joke_delete(key=apikey, joke_id=joke_id)
         new_joke_id = await to.joke_insert(key=apikey, joke_text=str(joke_text))
         body = json.dumps(r_body.result({"new_joke_id": new_joke_id.id}))
