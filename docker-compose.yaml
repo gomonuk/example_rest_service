@@ -1,0 +1,17 @@
+version: '3.2'
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres_compose
+    ports:
+      - "5432:5432"
+
+  joke_servise:
+    build: .
+    container_name: joke_servise
+    command: gunicorn src.app:app -b :9996 --worker-class aiohttp.GunicornWebWorker
+    ports:
+      - "9996:9996"
+    depends_on:
+      - postgres

@@ -1,0 +1,21 @@
+tags:
+  - Операции с пользователем
+summary: Регистрация пользователя
+description: Регистрация пользователя и получение ключа.
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        login:
+          type: string
+          description: Придумайте имя пользователя
+      required:
+        - login
+responses:
+"200":
+  description: successful operation

@@ -1,0 +1,25 @@
+tags:
+  - Операции с шутками
+summary: Удалить шутку
+description: Удалить вашу шутку.
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        apikey:
+          type: integer
+          description: Передайте ключ полученый после регистрации
+        joke_id:
+          type: integer
+          description: Передайте id шутки
+      required:
+        - apikey
+        - joke_id
+responses:
+"200":
+  description: successful operation

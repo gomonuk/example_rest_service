@@ -3,3 +3,4 @@ aiohttp
 aiopg
 sqlalchemy
 aiohttp_swagger
+gunicorn

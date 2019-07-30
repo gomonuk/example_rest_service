@@ -1,0 +1,29 @@
+tags:
+  - Операции с шутками
+summary: Обновить шутку
+description: Обновить текст вашей шутки.
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        apikey:
+          type: integer
+          description: Передайте ключ полученый после регистрации
+        joke_id:
+          type: integer
+          description: Передайте id шутки
+        joke_text:
+          type: string
+          description: Придумайте имя пользователя
+      required:
+        - apikey
+        - joke_id
+        - joke_text
+responses:
+"200":
+  description: successful operation

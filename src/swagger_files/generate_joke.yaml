@@ -1,0 +1,21 @@
+tags:
+  - Операции с шутками
+summary: Сгенерировать шутку
+description: Сгенерировать шутку.
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      properties:
+        apikey:
+          type: integer
+          description: Передайте ключ полученый после регистрации
+      required:
+        - apikey
+responses:
+"200":
+  description: successful operation
