@@ -7,7 +7,7 @@ from src import to, r_body
 from src.middleware import error_middleware, fields_check_middleware
 
 
-@swagger_path("swagger_files/generate_joke.yaml")
+@swagger_path("../swagger_files/generate_joke.yaml")
 async def generate_joke(request):
     data = await request.json()
     async with ClientSession() as session:
@@ -18,7 +18,7 @@ async def generate_joke(request):
     return web.Response(body=json.dumps(r_body.result({"joke_id": id_joke.id})))
 
 
-@swagger_path("swagger_files/delete_joke.yaml")
+@swagger_path("../swagger_files/delete_joke.yaml")
 async def delete_joke(request):
     data = await request.json()
     joke = await to.joke_get(key=data["apikey"], joke_id=data["joke_id"])
@@ -32,20 +32,19 @@ async def delete_joke(request):
     return web.Response(body=body)
 
 
-@swagger_path("swagger_files/get_joke.yaml")
+@swagger_path("../swagger_files/get_joke.yaml")
 async def get_joke(request):
     data = await request.json()
     joke = await to.joke_get(key=data["apikey"], joke_id=data.get("joke_id") or None)
     return web.Response(body=json.dumps(r_body.result(joke)))
 
 
-@swagger_path("swagger_files/update_joke.yaml")
+@swagger_path("../swagger_files/update_joke.yaml")
 async def update_joke(request):
     data = await request.json()
     apikey = data["apikey"]
     joke_id = data["joke_id"]
     joke_text = data["joke_text"]
-
     joke = await to.joke_get(key=apikey, joke_id=joke_id)
 
     if joke:
@@ -58,7 +57,7 @@ async def update_joke(request):
     return web.Response(body=body)
 
 
-@swagger_path("swagger_files/do_login.yaml")
+@swagger_path("../swagger_files/do_login.yaml")
 async def do_login(request):
     data = await request.json()
     login = data.get("login")

@@ -33,6 +33,7 @@ class TableOperations(object):
             user="postgres",
             password="",
             host="0.0.0.0",
+            # host="postgres",
             port="5432",
         )
         await self.__setup_database()
