@@ -8,14 +8,9 @@ parameters:
   - in: query
     name: login
     required: true
+    description:  Придумайте имя пользователя
     schema:
-      type: object
-      properties:
-        login:
-          type: string
-          description: Придумайте имя пользователя,
-      required:
-        - login
+      type: string
 responses:
 "200":
   description: successful operation

@@ -28,7 +28,6 @@ async def error_middleware(request, handler):
         if response.status == 200:
             return response
     except web.HTTPException as ex:
-        logger.warning("Request {} has failed with exception: {}".format(request, repr(ex)))
         if ex.status == 404:
             return json_error(ex.status, ex)
         raise
@@ -39,16 +38,9 @@ async def error_middleware(request, handler):
 @web.middleware
 async def logger_middleware(request, handler):
     response = await handler(request)
-
-    try:
-        response_dict = json.loads(response.text)
-        logger.error("Request has failed with exception: {}".format(request, str(response_dict)))
-    except AttributeError:
-        response_dict = json.loads(response.body._value)
-        logger.info("Success request {}".format(request, str(response_dict)))
-
-    json_data = json.dumps({"response_dict": response_dict, "path_qs": request.path_qs, "method": request.method})
+    json_data = json.dumps({"response.status": response.status, "path_qs": request.path_qs, "method": request.method})
     apikey = request.rel_url.query.get("apikey")
+    logger.info("Apikey: {} make request {}".format(apikey, json_data))
     await to.execute(to.insert_to_logs, tuple_params=(apikey, request.remote, json_data))
     return response
 
