@@ -7,8 +7,8 @@ from src.tests.base_class import BaseClass
 
 class TestGenerateJoke(BaseClass):
     @unittest_run_loop
-    async def test_2_positive(self):
-        resp = await self.client.post("/joke", data=json.dumps({"apikey": self.apikey}))
+    async def test_1_positive(self):
+        resp = await self.client.post("/joke", params={"apikey": self.apikey})
         data = await resp.text()
         json_data = json.loads(data)
         self.assertEqual(first=type(json_data.get("result", {}).get("joke_id")),
@@ -17,8 +17,8 @@ class TestGenerateJoke(BaseClass):
                          )
 
     @unittest_run_loop
-    async def test_3_negative(self):
-        resp = await self.client.post("/joke", data=json.dumps({"apikey": 3}))
+    async def test_2_negative(self):
+        resp = await self.client.post("/joke", params={"apikey": 3})
         data = await resp.text()
         json_data = json.loads(data)
         self.assertEqual(first=type(json_data.get("error")),

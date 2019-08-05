@@ -1,19 +1,19 @@
 tags:
   - Операции с пользователем
 summary: Регистрация пользователя
-description: Регистрация пользователя и получение ключа.
+description: Регистрация пользователя и получение ключа. Логин не уникален, в отличии от ключа.
 produces:
   - application/json
 parameters:
-  - in: body
-    name: body
+  - in: query
+    name: login
     required: true
     schema:
       type: object
       properties:
         login:
           type: string
-          description: Придумайте имя пользователя
+          description: Придумайте имя пользователя,
       required:
         - login
 responses:

@@ -1,24 +1,22 @@
 tags:
   - Операции с шутками
 summary: Получить шутку
-description: Получить вашу шутку.
+description: Получить список ваших шуток. Передайте joke_id для фильтрации списка.
 produces:
   - application/json
 parameters:
-  - in: body
-    name: body
+  - in: query
+    name: apikey
     required: true
+    description: Передайте ключ полученый после регистрации
     schema:
-      type: object
-      properties:
-        apikey:
-          type: integer
-          description: Передайте ключ полученый после регистрации
-        joke_id:
-          type: integer
-          description: Передайте id шутки
-      required:
-        - apikey
+      type: integer
+  - in: query
+    name: joke_id
+    required: false
+    description: Передайте id шутки
+    schema:
+      type: integer
 responses:
 "200":
   description: successful operation

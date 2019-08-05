@@ -8,9 +8,9 @@ from src.tests.base_class import BaseClass
 class TestGetJoke(BaseClass):
     @unittest_run_loop
     async def test_1_positive(self):
-        resp = await self.client.get("/joke", data=json.dumps({"apikey": self.apikey,
-                                                               "joke_id": self.id_joke.id,
-                                                               }))
+        resp = await self.client.get("/joke", params={"apikey": self.apikey,
+                                                      "joke_id": self.fake_joke_id
+                                                      })
         data = await resp.text()
         json_data = json.loads(data)
         self.assertEqual(first=type(json_data.get("result")),
@@ -20,9 +20,9 @@ class TestGetJoke(BaseClass):
 
     @unittest_run_loop
     async def test_2_negative(self):
-        resp = await self.client.put("/joke", data=json.dumps({"apikey": self.apikey,
-                                                               "joke_id": 5,
-                                                               }))
+        resp = await self.client.put("/joke", params={"apikey": self.apikey,
+                                                      "joke_id": 5,
+                                                      })
         data = await resp.text()
         json_data = json.loads(data)
         self.assertEqual(first=type(json_data.get("error")),

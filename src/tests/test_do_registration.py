@@ -5,10 +5,10 @@ from aiohttp.test_utils import unittest_run_loop
 from src.tests.base_class import BaseClass
 
 
-class TestDoLogin(BaseClass):
+class TestDoRegistration(BaseClass):
     @unittest_run_loop
     async def test_1_positive(self):
-        resp = await self.client.post("/do_login", data=json.dumps({"login": "test_user"}))
+        resp = await self.client.post("/registration", params={"login": "test_user"})
         data = await resp.text()
         json_data = json.loads(data)
         self.assertEqual(first=type(json_data.get("result", {}).get("apikey")),
@@ -18,7 +18,7 @@ class TestDoLogin(BaseClass):
 
     @unittest_run_loop
     async def test_2_negative(self):
-        resp = await self.client.post("/do_login", data=json.dumps({"log": "test_user"}))
+        resp = await self.client.post("/registration", params={"log": "test_user"})
         data = await resp.text()
         json_data = json.loads(data)
         self.assertEqual(first=type(json_data.get("error")),

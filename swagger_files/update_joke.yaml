@@ -5,25 +5,24 @@ description: Обновить текст вашей шутки.
 produces:
   - application/json
 parameters:
-  - in: body
-    name: body
+  - in: query
+    name: apikey
     required: true
+    description: Передайте ключ полученый после регистрации
     schema:
-      type: object
-      properties:
-        apikey:
-          type: integer
-          description: Передайте ключ полученый после регистрации
-        joke_id:
-          type: integer
-          description: Передайте id шутки
-        joke_text:
-          type: string
-          description: Придумайте имя пользователя
-      required:
-        - apikey
-        - joke_id
-        - joke_text
+      type: integer
+  - in: query
+    name: joke_id
+    required: true
+    description: Передайте id шутки
+    schema:
+      type: integer
+  - in: query
+    name: joke_text
+    required: true
+    description: Передайте новый текст шутки
+    schema:
+      type: string
 responses:
 "200":
   description: successful operation

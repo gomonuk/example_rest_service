@@ -5,21 +5,18 @@ description: Удалить вашу шутку.
 produces:
   - application/json
 parameters:
-  - in: body
-    name: body
+  - in: query
+    name: apikey
     required: true
+    description: Передайте ключ полученый после регистрации
     schema:
-      type: object
-      properties:
-        apikey:
-          type: integer
-          description: Передайте ключ полученый после регистрации
-        joke_id:
-          type: integer
-          description: Передайте id шутки
-      required:
-        - apikey
-        - joke_id
+      type: integer
+  - in: query
+    name: joke_id
+    required: true
+    description: Передайте id шутки
+    schema:
+      type: integer
 responses:
 "200":
   description: successful operation
